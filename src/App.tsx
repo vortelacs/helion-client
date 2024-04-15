@@ -1,8 +1,29 @@
 import "./App.css";
+import { useState } from "react";
+import Header from "./components/common/Header";
 import ProcessForm from "./pages/ProcessForm";
+import ProcessTable from "./pages/ProcessTable";
 
 function App() {
-  return <ProcessForm></ProcessForm>;
+  const [showForm, setShowForm] = useState(true);
+
+  const handleNavigateToForm = () => {
+    setShowForm(true);
+  };
+
+  const handleNavigateToTable = () => {
+    setShowForm(false);
+  };
+
+  return (
+    <div>
+      <Header
+        onNavigateToForm={handleNavigateToForm}
+        onNavigateToTable={handleNavigateToTable}
+      />
+      {showForm ? <ProcessForm /> : <ProcessTable />}
+    </div>
+  );
 }
 
 export default App;

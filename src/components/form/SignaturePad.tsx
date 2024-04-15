@@ -1,8 +1,12 @@
 import React, { useState } from "react";
 import SignatureCanvas from "react-signature-canvas";
 
-const SignaturePad = () => {
-  const sign = React.useRef() as React.MutableRefObject<any>;
+interface SignaturePadProps {
+  onSave: (url: string) => void;
+}
+
+const SignaturePad: React.FC<SignaturePadProps> = ({ onSave }) => {
+  const sign = React.useRef<any>(null);
   const [url, setUrl] = useState("");
 
   const handleClear = () => {
@@ -14,10 +18,11 @@ const SignaturePad = () => {
 
   const handleGenerate = () => {
     if (sign.current) {
-      setUrl(sign.current.getTrimmedCanvas().toDataURL("image/svg"));
+      const dataUrl = sign.current.getTrimmedCanvas().toDataURL("image/svg");
+      setUrl(dataUrl);
+      onSave(dataUrl);
     }
   };
-
   const handleEndDrawing = () => {
     handleGenerate();
   };
