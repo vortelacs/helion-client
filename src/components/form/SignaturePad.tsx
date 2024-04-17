@@ -38,7 +38,10 @@ const SignaturePad: React.FC<SignaturePadProps> = ({ onSave }) => {
       </div>
 
       <br />
-      <button style={{ height: "30px", width: "60px" }} onClick={handleClear}>
+      <button
+        className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+        onClick={handleClear}
+      >
         Clear
       </button>
     </div>
