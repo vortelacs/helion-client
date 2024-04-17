@@ -21,7 +21,9 @@ function App() {
         onNavigateToForm={handleNavigateToForm}
         onNavigateToTable={handleNavigateToTable}
       />
-      {showForm ? <ProcessForm /> : <ProcessTable />}
+      <div className="min-h-screen flex items-center justify-center relative group">
+        {showForm ? <ProcessForm /> : <ProcessTable />}
+      </div>
     </div>
   );
 }
