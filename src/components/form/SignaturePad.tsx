@@ -40,6 +40,7 @@ const SignaturePad: React.FC<SignaturePadProps> = ({ onSave }) => {
       toast("Location data is not available. Please try again later.");
       return;
     }
+    toast(coords.latitude + " " + coords.longitude);
     onSave(url, coords);
   };
 
