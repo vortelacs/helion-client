@@ -1,30 +1,38 @@
-import React, { ReactNode, useState } from "react";
+import React from "react";
 
-interface DropdownProps {
-  buttonLabel: string;
-  children: ReactNode;
+interface Option {
+  value: string;
+  label: string;
+  additionalInfo: string;
 }
 
-const Dropdown: React.FC<DropdownProps> = ({ buttonLabel, children }) => {
-  const [isOpen, setIsOpen] = useState(false);
+interface DropdownProps {
+  options: Option[];
+  onSelect: (selectedValue: string) => void;
+  renderOption?: (option: Option) => React.ReactNode;
+}
 
-  const toggleDropdown = () => {
-    setIsOpen(!isOpen);
+const Dropdown: React.FC<DropdownProps> = ({
+  options,
+  onSelect,
+  renderOption,
+}) => {
+  const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedValue = event.target.value;
+    onSelect(selectedValue);
   };
 
   return (
-    <div className="relative">
-      <button
-        onClick={toggleDropdown}
-        className="bg-blue-500 text-white px-4 py-2 rounded shadow"
-      >
-        {buttonLabel}
-      </button>
-      {isOpen && (
-        <div className="absolute mt-1 bg-white w-56 shadow-lg rounded-lg border">
-          {children}
-        </div>
-      )}
-    </div>
+    <select onChange={handleChange}>
+      {options.map((option) => (
+        <option key={option.value} value={option.value}>
+          {renderOption
+            ? renderOption(option)
+            : `${option.label} - ${option.additionalInfo}`}
+        </option>
+      ))}
+    </select>
   );
 };
+
+export default Dropdown;

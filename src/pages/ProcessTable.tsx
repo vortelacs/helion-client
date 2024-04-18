@@ -1,29 +1,21 @@
-import React from "react";
-import { ProcessInfoDTO } from "../model/ProcessInfoDTO";
+import React, { useEffect, useState } from "react";
+import { ProcessInfoDTO } from "../model/dto/ProcessInfoDTO";
+import axios from "axios";
 
-const DOTNET_API_URL = process.env.DOTNET_API_URL;
+// const DOTNET_API_URL = process.env.REACT_APP_DOTNET_API_URL;
 
 const ProcessTable = () => {
-  const handleTableFetch = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const [processes, setProcesses] = useState<ProcessInfoDTO[]>([]);
 
-    try {
-      console.log("DOTNET_API_URL:", DOTNET_API_URL);
-      const response = await fetch(`${DOTNET_API_URL}/process`, {
-        method: "GET",
+  useEffect(() => {
+    axios
+      .get<ProcessInfoDTO[]>("http://localhost:5179/processes")
+      // .get<ProcessInfoDTO[]>(`DOTNET_API_URL` + "/processes")
+      .then((res) => setProcesses(res.data))
+      .catch((err) => {
+        throw err.message;
       });
-
-      if (response.ok) {
-        const responseData: ProcessInfoDTO[] = await response.json();
-        console.log("Response data:", responseData);
-      } else {
-        console.error("Error fetching processes", response.statusText);
-      }
-    } catch (error) {
-      console.error("Network error:", error);
-    }
-  };
-
+  }, []);
   return (
     <div className="overflow-x-auto">
       <table className="table-auto border-collapse border border-gray-400">
@@ -45,14 +37,14 @@ const ProcessTable = () => {
           </tr>
         </thead>
         <tbody>
-          {/* {processes.map((process) => (
+          {processes.map((process) => (
             <tr key={process.id}>
               <td className="px-4 py-2 border border-gray-400">{process.id}</td>
               <td className="px-4 py-2 border border-gray-400">
-                {process.date}
+                {process.signDate.toString()}
               </td>
               <td className="px-4 py-2 border border-gray-400">
-                {process.company.name}
+                {process.companyName}
               </td>
               <td className="px-4 py-2 border border-gray-400">
                 {process.eSignature}
@@ -61,7 +53,7 @@ const ProcessTable = () => {
                 {process.gpsLocation}
               </td>
             </tr>
-          ))} */}
+          ))}
         </tbody>
       </table>
     </div>

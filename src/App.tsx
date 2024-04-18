@@ -3,7 +3,8 @@ import { useState } from "react";
 import Header from "./components/common/Header";
 import ProcessForm from "./pages/ProcessForm";
 import ProcessTable from "./pages/ProcessTable";
-
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 function App() {
   const [showForm, setShowForm] = useState(true);
 
@@ -17,6 +18,7 @@ function App() {
 
   return (
     <div>
+      <ToastContainer />
       <Header
         onNavigateToForm={handleNavigateToForm}
         onNavigateToTable={handleNavigateToTable}
