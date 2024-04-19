@@ -1,34 +1,35 @@
 import React from "react";
 
-interface Option {
-  value: string;
+interface Option<T = string> {
+  value: T;
   label: string;
-  additionalInfo: string;
+  additionalInfo?: string;
 }
 
-interface DropdownProps {
-  options: Option[];
-  onSelect: (selectedValue: string) => void;
-  renderOption?: (option: Option) => React.ReactNode;
+interface DropdownProps<T = string> {
+  options: Option<T>[];
+  onSelect: (selectedValue: T) => void;
+  renderOption?: (option: Option<T>) => React.ReactNode;
 }
 
-const Dropdown: React.FC<DropdownProps> = ({
+const Dropdown: React.FC<DropdownProps<any>> = ({
   options,
   onSelect,
   renderOption,
 }) => {
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedValue = event.target.value;
-    onSelect(selectedValue);
+    onSelect(JSON.parse(event.target.value));
   };
 
   return (
     <select onChange={handleChange}>
-      {options.map((option) => (
-        <option key={option.value} value={option.value}>
+      {options.map((option, index) => (
+        <option key={index} value={JSON.stringify(option.value)}>
           {renderOption
             ? renderOption(option)
-            : `${option.label} - ${option.additionalInfo}`}
+            : `${option.label}${
+                option.additionalInfo ? ` - ${option.additionalInfo}` : ""
+              }`}
         </option>
       ))}
     </select>
