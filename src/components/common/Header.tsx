@@ -12,13 +12,22 @@ const Header: React.FC<HeaderProps> = ({
   return (
     <header>
       <nav
-        className="relative flex w-full items-center justify-between bg-white py-2 shadow-dark-mild dark:bg-body-dark lg:flex-wrap lg:justify-start lg:py-4"
+        className="relative flex w-full items-center justify-between  py-2 shadow-md bg-gray-800 lg:flex-wrap lg:justify-start lg:py-4"
         data-twe-navbar-ref
       >
-        <div className="flex w-full flex-wrap items-center justify-self-auto px-3">
-          <div className="flex items-center"></div>
-          <button onClick={onNavigateToForm}>Go to Form</button>
-          <button onClick={onNavigateToTable}>Go to Table</button>
+        <div className="flex w-full flex-wrap px-3">
+          <button
+            onClick={onNavigateToForm}
+            className="text-white  hover:bg-blue-600 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 "
+          >
+            Go to Form
+          </button>
+          <button
+            onClick={onNavigateToTable}
+            className="text-white  hover:bg-blue-600 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 "
+          >
+            Go to Table
+          </button>
         </div>
       </nav>
     </header>
