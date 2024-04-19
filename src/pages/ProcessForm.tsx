@@ -8,6 +8,13 @@ import { Workplace } from "model/Workplace";
 import { Service } from "model/Service";
 import { Process } from "model/Process";
 import { ProcessCreateRequestDTO } from "model/dto/ProcessCreateRequestDTO";
+import Dropdown, { Option } from "components/common/Dropdown";
+
+interface DataRetrieve<T> {
+  data: T[];
+  loading: boolean;
+  error: Error | null;
+}
 
 const ProcessForm = () => {
   const [companyId, setCompanyId] = useState<number>(0);
@@ -19,13 +26,32 @@ const ProcessForm = () => {
   const [employeeIds, setEmployeeIds] = useState<number[]>([]);
   const [serviceIds, setServiceIds] = useState<number[]>([]);
 
-  const [employees, loadingEmployees, errorEmployees] =
-    useFetchData<Employee>("Employee");
-  const [representatives, setRepresentatives] =
+  const companies: DataRetrieve<Company> = useFetchData<Company>("Company");
+  const workplaces: DataRetrieve<Workplace> =
+    useFetchData<Workplace>("Workplace");
+  const services: DataRetrieve<Service> = useFetchData<Service>("Services");
+  const representatives: DataRetrieve<Representative> =
     useFetchData<Representative>("Representative");
-  const [companies, setCompanies] = useFetchData<Company[]>("Company");
-  const [workplaces, setWorkplaces] = useFetchData<Workplace[]>("Workplace");
-  const [services, setService] = useFetchData<Service[]>("Service");
+  const employees: DataRetrieve<Employee[]> =
+    useFetchData<Employee[]>("Employee");
+
+  const companyOptions: Option<number>[] = companies.data.map((company) => ({
+    value: company.id,
+    label: company.name,
+    additionalInfo: `CUI: ${company.cui}`,
+  }));
+
+  const representativeOptions: Option<number>[] = representatives.data.map(
+    (representative) => ({
+      value: representative.id,
+      label: representative.firstName + " " + representative.lastName,
+      additionalInfo: `position: ${representative.position}`,
+    })
+  );
+
+  const handleSelectCompany = (companyId: number) => {
+    setCompanyId(companyId);
+  };
 
   const handleSignatureSave = (url: string) => {
     setESignature(url);
@@ -33,7 +59,6 @@ const ProcessForm = () => {
   };
 
   const handleSubmit = async () => {
-    // Create the ProcessCreateRequestDTO object
     const processCreateRequestDTO: ProcessCreateRequestDTO = {
       signDate: new Date(),
       companyId: companyId,
@@ -58,6 +83,30 @@ const ProcessForm = () => {
 
   return (
     <div className="border p-4 flex flex-col">
+      <div className="my-4">
+        <p>Choose the company</p>
+        {companies.loading ? (
+          <div>Loading Companies...</div>
+        ) : companies.error ? (
+          <div>Error loading companies: {companies.error.message}</div>
+        ) : (
+          <Dropdown options={companyOptions} onSelect={handleSelectCompany} />
+        )}
+      </div>
+      <div className="my-4">
+        {companies.loading ? (
+          <div>Loading Representatives...</div>
+        ) : representatives.error ? (
+          <div>
+            Error loading representatives: {representatives.error.message}
+          </div>
+        ) : (
+          <Dropdown
+            options={representativeOptions}
+            onSelect={handleSelectCompany}
+          />
+        )}
+      </div>
       <SignaturePad onSave={handleSignatureSave} />
       <hr className="border-1 border-slate-950 my-7"></hr>
       <div className=" p-2 self-end">
@@ -74,7 +123,7 @@ const ProcessForm = () => {
 
 export default ProcessForm;
 
-function useFetchData<T>(url: string): [T[], boolean, any] {
+function useFetchData<T>(url: string): DataRetrieve<T> {
   const [data, setData] = useState<T[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -98,5 +147,5 @@ function useFetchData<T>(url: string): [T[], boolean, any] {
     fetchData();
   }, [url]);
 
-  return [data, loading, error];
+  return { data, loading, error };
 }

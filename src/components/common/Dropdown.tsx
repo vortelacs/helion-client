@@ -1,6 +1,6 @@
 import React from "react";
 
-interface Option<T = string> {
+export interface Option<T = string> {
   value: T;
   label: string;
   additionalInfo?: string;
@@ -11,7 +11,6 @@ interface DropdownProps<T = string> {
   onSelect: (selectedValue: T) => void;
   renderOption?: (option: Option<T>) => React.ReactNode;
 }
-
 const Dropdown: React.FC<DropdownProps<any>> = ({
   options,
   onSelect,
