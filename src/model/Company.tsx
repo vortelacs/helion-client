@@ -5,6 +5,14 @@ export interface Company {
   id: number;
   cui: number;
   name: string;
-  representatives: Representative[];
   workplaces: Workplace[];
 }
+
+// export interface SRL extends Company {
+//   registrationCode: number;
+// }
+
+// export interface PFA extends Company {
+//   cnp: number;
+//   activity: string;
+// }

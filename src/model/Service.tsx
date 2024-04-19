@@ -1,4 +1,4 @@
-export interface System {
+export interface Service {
   id: number;
   name: string;
 }

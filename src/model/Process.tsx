@@ -2,7 +2,7 @@ import { Company } from "./Company";
 import { Workplace } from "./Workplace";
 import { Representative } from "./Representative";
 import { Employee } from "./Employee";
-import { System } from "./System";
+import { Service } from "./Service";
 
 export interface Process {
   id: number;
@@ -11,7 +11,7 @@ export interface Process {
   workplaces: Workplace[];
   representatives: Representative[];
   employees: Employee[];
-  systems: System[];
+  services: Service[];
   eSignature: string;
   gpsLocation: string;
 }
