@@ -9,6 +9,13 @@ import { Service } from "model/Service";
 import { Process } from "model/Process";
 import { ProcessCreateRequestDTO } from "model/dto/ProcessCreateRequestDTO";
 import Dropdown, { Option } from "components/common/Dropdown";
+import CheckBoxDropdown, {
+  MultiOption,
+  formatOptionLabel,
+} from "components/common/CheckBoxDropdown";
+import { useGeolocated } from "react-geolocated";
+import Select from "react-select";
+import OptionWithInfo from "components/common/CheckBoxDropdown";
 
 interface DataRetrieve<T> {
   data: T[];
@@ -24,16 +31,28 @@ const ProcessForm = () => {
   const [gpsLocation, setGPSLocation] = useState<string>("");
   const [workplacesIds, setWorkplacesIds] = useState<number[]>([]);
   const [employeeIds, setEmployeeIds] = useState<number[]>([]);
-  const [serviceIds, setServiceIds] = useState<number[]>([]);
+  const [servicesIds, setServicesIds] = useState<number[]>([]);
 
   const companies: DataRetrieve<Company> = useFetchData<Company>("Company");
-  const workplaces: DataRetrieve<Workplace> =
-    useFetchData<Workplace>("Workplace");
-  const services: DataRetrieve<Service> = useFetchData<Service>("Services");
   const representatives: DataRetrieve<Representative> =
     useFetchData<Representative>("Representative");
-  const employees: DataRetrieve<Employee[]> =
-    useFetchData<Employee[]>("Employee");
+  const workplaces: DataRetrieve<Workplace> =
+    useFetchData<Workplace>("Workplace");
+  const services: DataRetrieve<Service> = useFetchData<Service>("Service");
+  const employees: DataRetrieve<Employee> = useFetchData<Employee>("Employee");
+
+  const workplaceOptions: Option<number>[] = workplaces.data.map(
+    (workplace) => ({
+      value: workplace.id,
+      label: workplace.name,
+      description: `Address: ${workplace.zone} ${workplace.city} ${workplace.address}`,
+    })
+  );
+
+  const serviceOptions: Option<number>[] = services.data.map((service) => ({
+    value: service.id,
+    label: service.name,
+  }));
 
   const companyOptions: Option<number>[] = companies.data.map((company) => ({
     value: company.id,
@@ -49,12 +68,40 @@ const ProcessForm = () => {
     })
   );
 
+  const employeeOptions: Option<number>[] = employees.data.map((employee) => ({
+    value: employee.id,
+    label: employee.firstName + " " + employee.lastName,
+    additionalInfo: `position: ${employee.position}`,
+  }));
+
   const handleSelectCompany = (companyId: number) => {
     setCompanyId(companyId);
   };
 
-  const handleSignatureSave = (url: string) => {
+  const handleSelectRepresentative = (RepresentativeId: number) => {
+    setRepresentativeId(RepresentativeId);
+  };
+
+  function handleSelectWorkplaces(selectedValue: Workplace[]): void {
+    const ids = selectedValue.map((workplace) => workplace.id);
+    setWorkplacesIds(ids);
+  }
+
+  function handleSelectServices(selectedValue: Service[]): void {
+    const ids = selectedValue.map((service) => service.id);
+    setServicesIds(ids);
+  }
+
+  function handleSelectEmployees(selectedValue: number[]): void {
+    setEmployeeIds(selectedValue);
+  }
+
+  const handleSignatureSave = (
+    url: string,
+    coordinates: GeolocationCoordinates
+  ) => {
     setESignature(url);
+    setGPSLocation(coordinates.latitude + " " + coordinates.longitude);
     setSignDate(new Date());
   };
 
@@ -67,17 +114,26 @@ const ProcessForm = () => {
       gpsLocation: gpsLocation,
       workplacesIds: workplacesIds,
       employeeIds: employeeIds,
-      serviceIds: serviceIds,
+      serviceIds: servicesIds,
     };
 
     try {
       const response = await axios.post(
-        "http://localhost:5179/api/process",
+        "http://localhost:5179/process",
         processCreateRequestDTO
       );
       console.log("Process submitted successfully:", response.data);
-    } catch (error) {
-      console.error("Error submitting process:", error);
+    } catch (error: any) {
+      if (error.response) {
+        console.error("Error data:", error.response.data);
+        console.error("Error status:", error.response.status);
+        console.error("Error headers:", error.response.headers);
+      } else if (error.request) {
+        console.error("No response received:", error.request);
+      } else {
+        console.error("Error", error.message);
+      }
+      console.log(processCreateRequestDTO);
     }
   };
 
@@ -94,6 +150,7 @@ const ProcessForm = () => {
         )}
       </div>
       <div className="my-4">
+        <p>Choose the company</p>
         {companies.loading ? (
           <div>Loading Representatives...</div>
         ) : representatives.error ? (
@@ -103,7 +160,50 @@ const ProcessForm = () => {
         ) : (
           <Dropdown
             options={representativeOptions}
-            onSelect={handleSelectCompany}
+            onSelect={handleSelectRepresentative}
+          />
+        )}
+      </div>
+      <div className="my-4">
+        <p>Choose the employees</p>
+        {companies.loading ? (
+          <div>Loading employees...</div>
+        ) : employees.error ? (
+          <div>Error loading employees: {employees.error.message}</div>
+        ) : (
+          <Select
+            options={employeeOptions}
+            onChange={handleSelectEmployees as any}
+            isMulti={true}
+          />
+        )}
+      </div>
+      <div className="my-4">
+        <p>Choose the workplaces</p>
+        {workplaces.loading ? (
+          <div>Loading workplaces...</div>
+        ) : workplaces.error ? (
+          <div>Error loading workplaces: {workplaces.error.message}</div>
+        ) : (
+          <Select
+            options={workplaceOptions}
+            onChange={handleSelectWorkplaces as any}
+            isMulti={true}
+            formatOptionLabel={formatOptionLabel}
+          />
+        )}
+      </div>
+      <div className="my-4">
+        <p>Choose the services</p>
+        {services.loading ? (
+          <div>Loading services...</div>
+        ) : services.error ? (
+          <div>Error loading services: {services.error.message}</div>
+        ) : (
+          <Select
+            options={serviceOptions}
+            isMulti={true}
+            onChange={handleSelectServices as any}
           />
         )}
       </div>

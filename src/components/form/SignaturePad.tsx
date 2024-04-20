@@ -3,13 +3,8 @@ import { useGeolocated } from "react-geolocated";
 import SignatureCanvas from "react-signature-canvas";
 import { toast } from "react-toastify";
 
-interface Coordinates {
-  latitude: number;
-  longitude: number;
-}
-
 interface SignaturePadProps {
-  onSave: (url: string, coordinates: Coordinates) => void;
+  onSave: (url: string, coordinates: GeolocationCoordinates) => void;
 }
 
 const SignaturePad: React.FC<SignaturePadProps> = ({ onSave }) => {

@@ -1,6 +1,6 @@
 import React from "react";
 
-export interface Option<T = string> {
+export interface Option<T = number> {
   value: T;
   label: string;
   additionalInfo?: string;
