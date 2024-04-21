@@ -20,23 +20,41 @@ interface DataRetrieve<T> {
   loading: boolean;
   error: Error | null;
 }
+type CompanyType = "Company" | "SRL" | "PFA";
 
-const companyFields: FieldMetadata[] = [
-  { name: "id", label: "ID", type: "number" },
-  { name: "cui", label: "CUI", type: "number" },
-  { name: "name", label: "Name", type: "text" },
+const fieldMetadata: Record<CompanyType, FieldMetadata[]> = {
+  Company: [
+    { name: "id", label: "ID", type: "number" },
+    { name: "cui", label: "CUI", type: "number" },
+    { name: "name", label: "Name", type: "text" },
+  ],
+  SRL: [
+    { name: "id", label: "ID", type: "number" },
+    { name: "cui", label: "CUI", type: "number" },
+    { name: "name", label: "Name", type: "text" },
+    { name: "registrationCode", label: "Registration Code", type: "number" },
+  ],
+  PFA: [
+    { name: "id", label: "ID", type: "number" },
+    { name: "cui", label: "CUI", type: "number" },
+    { name: "name", label: "Name", type: "text" },
+    { name: "cnp", label: "CNP", type: "number" },
+    { name: "activity", label: "Activity", type: "text" },
+  ],
+};
+
+const options = [
+  { value: "Company", label: "Company" },
+  { value: "SRL", label: "SRL" },
+  { value: "PFA", label: "PFA" },
 ];
-
-<GenericForm
-  fields={companyFields}
-  initialData={{ id: 0, cui: 0, name: "" }}
-  onSubmit={(data) => console.log(data)}
-/>;
 
 const ProcessForm = () => {
   const [companyId, setCompanyId] = useState<number>(0);
   const [companyName, setCompanyName] = useState("");
   const [companyCUI, setCompanyCUI] = useState(0);
+  const [companyType, setCompanyType] = useState<CompanyType>("Company");
+  const [formData, setFormData] = useState({});
   const [representativeId, setRepresentativeId] = useState<number>(0);
   const [eSignature, setESignature] = useState<string>("");
   const [signDate, setSignDate] = useState<Date>(new Date());
@@ -206,6 +224,14 @@ const ProcessForm = () => {
     }
   };
 
+  const handleCompanyTypeChange = (selectedOption: {
+    value: string;
+    label: string;
+  }) => {
+    setCompanyType(selectedOption.value as CompanyType);
+    setFormData({});
+  };
+
   return (
     <div className="border p-4 m-4 flex flex-col">
       <div className="my-4">
@@ -232,11 +258,28 @@ const ProcessForm = () => {
         ></input>
         <p className="px-2">My company is not in the list</p>
       </label>
-      <CustomCompanyForm
-        isVisible={isCustomCompanyVisible}
-        setName={setCompanyName}
-        setCui={setCompanyCUI}
-      ></CustomCompanyForm>
+      {isCustomCompanyVisible && (
+        <div>
+          <Select
+            className="m-2"
+            defaultValue={options.find(
+              (option) => option.value === companyType
+            )}
+            onChange={handleCompanyTypeChange as any}
+            options={options}
+          />
+          <GenericForm
+            fields={fieldMetadata[companyType]}
+            initialData={formData}
+            onSubmit={(data) => console.log("Submitted Data:", data)}
+          ></GenericForm>
+          {/* <CustomCompanyForm
+            isVisible={isCustomCompanyVisible}
+            setName={setCompanyName}
+            setCui={setCompanyCUI}
+          ></CustomCompanyForm>{" "} */}
+        </div>
+      )}
       <div className="my-4">
         <p>Choose the representative</p>
         {companies.loading ? (
