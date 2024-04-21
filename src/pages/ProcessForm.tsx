@@ -6,16 +6,14 @@ import { Representative } from "model/Representative";
 import { Employee } from "model/Employee";
 import { Workplace } from "model/Workplace";
 import { Service } from "model/Service";
-import { Process } from "model/Process";
 import { ProcessCreateRequestDTO } from "model/dto/ProcessCreateRequestDTO";
-import Dropdown, { Option } from "components/common/Dropdown";
-import CheckBoxDropdown, {
-  MultiOption,
-  formatOptionLabel,
-} from "components/common/CheckBoxDropdown";
-import { useGeolocated } from "react-geolocated";
+import { Option } from "components/common/Dropdown";
+import { formatOptionLabel } from "components/common/CheckBoxDropdown";
 import Select from "react-select";
-import OptionWithInfo from "components/common/CheckBoxDropdown";
+import { toast } from "react-toastify";
+import CustomCompanyForm from "components/form/CompanyForm";
+import { CompanyCreateRequestDTO } from "model/dto/CompanyCreateRequest";
+import GenericForm, { FieldMetadata } from "components/form/GenericForm";
 
 interface DataRetrieve<T> {
   data: T[];
@@ -23,8 +21,22 @@ interface DataRetrieve<T> {
   error: Error | null;
 }
 
+const companyFields: FieldMetadata[] = [
+  { name: "id", label: "ID", type: "number" },
+  { name: "cui", label: "CUI", type: "number" },
+  { name: "name", label: "Name", type: "text" },
+];
+
+<GenericForm
+  fields={companyFields}
+  initialData={{ id: 0, cui: 0, name: "" }}
+  onSubmit={(data) => console.log(data)}
+/>;
+
 const ProcessForm = () => {
   const [companyId, setCompanyId] = useState<number>(0);
+  const [companyName, setCompanyName] = useState("");
+  const [companyCUI, setCompanyCUI] = useState(0);
   const [representativeId, setRepresentativeId] = useState<number>(0);
   const [eSignature, setESignature] = useState<string>("");
   const [signDate, setSignDate] = useState<Date>(new Date());
@@ -32,7 +44,7 @@ const ProcessForm = () => {
   const [workplacesIds, setWorkplacesIds] = useState<number[]>([]);
   const [employeeIds, setEmployeeIds] = useState<number[]>([]);
   const [servicesIds, setServicesIds] = useState<number[]>([]);
-
+  const [isCustomCompanyVisible, setIsCustomCompanyVisible] = useState(false);
   const companies: DataRetrieve<Company> = useFetchData<Company>("Company");
   const representatives: DataRetrieve<Representative> =
     useFetchData<Representative>("Representative");
@@ -48,6 +60,46 @@ const ProcessForm = () => {
       description: `Address: ${workplace.zone} ${workplace.city} ${workplace.address}`,
     })
   );
+
+  const handleNewCompanyCreation = async (company: {
+    name: string;
+    cui: number;
+  }) => {
+    console.log("New Company Created:", company);
+
+    const companyDTO: CompanyCreateRequestDTO = {
+      name: company.name,
+      cui: company.cui,
+    };
+
+    try {
+      const response = await axios.post(
+        "http://localhost:5179/api/Company",
+        companyDTO
+      );
+      console.log(response);
+      toast("Company submitted successfully:", response.data);
+      const newCompany: Company = response.data;
+      setCompanyId(newCompany.id);
+    } catch (error: any) {
+      if (error.response) {
+        toast("Error data");
+        console.error("Error data:", error.response.data);
+        console.error("Error status:", error.response.status);
+        console.error("Error headers:", error.response.headers);
+      } else if (error.request) {
+        toast("No response received");
+        console.error("No response received:", error.request);
+      } else {
+        toast("Error! Try later");
+        console.error("Error", error.message);
+      }
+    }
+  };
+
+  const handleCustomCompanyIsVisibleChange = () => {
+    setIsCustomCompanyVisible(!isCustomCompanyVisible);
+  };
 
   const serviceOptions: Option<number>[] = services.data.map((service) => ({
     value: service.id,
@@ -74,7 +126,7 @@ const ProcessForm = () => {
     additionalInfo: `position: ${employee.position}`,
   }));
 
-  const handleSelectCompany = (companyId: number) => {
+  const handleSelectCompany = (selectedValue: number) => {
     setCompanyId(companyId);
   };
 
@@ -105,6 +157,17 @@ const ProcessForm = () => {
     setSignDate(new Date());
   };
 
+  const resetStates = () => {
+    setCompanyId(0);
+    setRepresentativeId(0);
+    setESignature("");
+    setSignDate(new Date()); // Reset to current date or specific initial date if needed
+    setGPSLocation("");
+    setWorkplacesIds([]);
+    setEmployeeIds([]);
+    setServicesIds([]);
+  };
+
   const handleSubmit = async () => {
     const processCreateRequestDTO: ProcessCreateRequestDTO = {
       signDate: new Date(),
@@ -117,28 +180,34 @@ const ProcessForm = () => {
       serviceIds: servicesIds,
     };
 
+    if (isCustomCompanyVisible)
+      handleNewCompanyCreation({ name: companyName, cui: companyCUI });
+
     try {
       const response = await axios.post(
         "http://localhost:5179/process",
         processCreateRequestDTO
       );
-      console.log("Process submitted successfully:", response.data);
+      toast("Process submitted successfully:", response.data);
+      resetStates();
     } catch (error: any) {
       if (error.response) {
+        toast("Error data");
         console.error("Error data:", error.response.data);
         console.error("Error status:", error.response.status);
         console.error("Error headers:", error.response.headers);
       } else if (error.request) {
+        toast("No response received");
         console.error("No response received:", error.request);
       } else {
+        toast("Error! Try later");
         console.error("Error", error.message);
       }
-      console.log(processCreateRequestDTO);
     }
   };
 
   return (
-    <div className="border p-4 flex flex-col">
+    <div className="border p-4 m-4 flex flex-col">
       <div className="my-4">
         <p>Choose the company</p>
         {companies.loading ? (
@@ -146,21 +215,41 @@ const ProcessForm = () => {
         ) : companies.error ? (
           <div>Error loading companies: {companies.error.message}</div>
         ) : (
-          <Dropdown options={companyOptions} onSelect={handleSelectCompany} />
+          <Select
+            isDisabled={isCustomCompanyVisible}
+            options={companyOptions}
+            onChange={handleSelectCompany as any}
+            isMulti={false}
+            required={true}
+          />
         )}
       </div>
+      <label className="flex my-2">
+        <input
+          type="checkbox"
+          checked={isCustomCompanyVisible}
+          onChange={handleCustomCompanyIsVisibleChange}
+        ></input>
+        <p className="px-2">My company is not in the list</p>
+      </label>
+      <CustomCompanyForm
+        isVisible={isCustomCompanyVisible}
+        setName={setCompanyName}
+        setCui={setCompanyCUI}
+      ></CustomCompanyForm>
       <div className="my-4">
-        <p>Choose the company</p>
+        <p>Choose the representative</p>
         {companies.loading ? (
-          <div>Loading Representatives...</div>
+          <div>Loading the representatives...</div>
         ) : representatives.error ? (
           <div>
             Error loading representatives: {representatives.error.message}
           </div>
         ) : (
-          <Dropdown
+          <Select
             options={representativeOptions}
-            onSelect={handleSelectRepresentative}
+            onChange={handleSelectRepresentative as any}
+            isMulti={false}
           />
         )}
       </div>
@@ -186,6 +275,7 @@ const ProcessForm = () => {
           <div>Error loading workplaces: {workplaces.error.message}</div>
         ) : (
           <Select
+            required={true}
             options={workplaceOptions}
             onChange={handleSelectWorkplaces as any}
             isMulti={true}
