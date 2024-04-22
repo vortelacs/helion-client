@@ -3,11 +3,11 @@ export interface CompanyCreateRequestDTO {
   name: string;
 }
 
-// export interface SRL extends Company {
-//   registrationCode: number;
-// }
+export interface SRLCreateRequestDTO extends CompanyCreateRequestDTO {
+  registrationCode: number;
+}
 
-// export interface PFA extends Company {
-//   cnp: number;
-//   activity: string;
-// }
+export interface PFACreateRequestDTO extends CompanyCreateRequestDTO {
+  cnp: number;
+  activity: string;
+}

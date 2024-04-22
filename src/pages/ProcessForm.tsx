@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import SignaturePad from "../components/form/SignaturePad";
-import { Company } from "model/Company";
+import { Company, PFA, SRL } from "model/Company";
 import { Representative } from "model/Representative";
 import { Employee } from "model/Employee";
 import { Workplace } from "model/Workplace";
@@ -11,8 +11,6 @@ import { Option } from "components/common/Dropdown";
 import { formatOptionLabel } from "components/common/CheckBoxDropdown";
 import Select from "react-select";
 import { toast } from "react-toastify";
-import CustomCompanyForm from "components/form/CompanyForm";
-import { CompanyCreateRequestDTO } from "model/dto/CompanyCreateRequest";
 import GenericForm, { FieldMetadata } from "components/form/GenericForm";
 
 interface DataRetrieve<T> {
@@ -22,20 +20,23 @@ interface DataRetrieve<T> {
 }
 type CompanyType = "Company" | "SRL" | "PFA";
 
+type CompanyData = {
+  Company: Company;
+  SRL: SRL;
+  PFA: PFA;
+};
+
 const fieldMetadata: Record<CompanyType, FieldMetadata[]> = {
   Company: [
-    { name: "id", label: "ID", type: "number" },
     { name: "cui", label: "CUI", type: "number" },
     { name: "name", label: "Name", type: "text" },
   ],
   SRL: [
-    { name: "id", label: "ID", type: "number" },
     { name: "cui", label: "CUI", type: "number" },
     { name: "name", label: "Name", type: "text" },
     { name: "registrationCode", label: "Registration Code", type: "number" },
   ],
   PFA: [
-    { name: "id", label: "ID", type: "number" },
     { name: "cui", label: "CUI", type: "number" },
     { name: "name", label: "Name", type: "text" },
     { name: "cnp", label: "CNP", type: "number" },
@@ -50,18 +51,16 @@ const options = [
 ];
 
 const ProcessForm = () => {
-  const [companyId, setCompanyId] = useState<number>(0);
-  const [companyName, setCompanyName] = useState("");
-  const [companyCUI, setCompanyCUI] = useState(0);
   const [companyType, setCompanyType] = useState<CompanyType>("Company");
-  const [formData, setFormData] = useState({});
+  const [companyId, setCompanyId] = useState<number>(0);
   const [representativeId, setRepresentativeId] = useState<number>(0);
-  const [eSignature, setESignature] = useState<string>("");
-  const [signDate, setSignDate] = useState<Date>(new Date());
-  const [gpsLocation, setGPSLocation] = useState<string>("");
   const [workplacesIds, setWorkplacesIds] = useState<number[]>([]);
-  const [employeeIds, setEmployeeIds] = useState<number[]>([]);
   const [servicesIds, setServicesIds] = useState<number[]>([]);
+  const [employeeIds, setEmployeeIds] = useState<number[]>([]);
+  const [formData, setFormData] = useState<Company | SRL | PFA>({} as Company);
+  const [signDate, setSignDate] = useState<Date>(new Date());
+  const [eSignature, setESignature] = useState<string>("");
+  const [gpsLocation, setGPSLocation] = useState<string>("");
   const [isCustomCompanyVisible, setIsCustomCompanyVisible] = useState(false);
   const companies: DataRetrieve<Company> = useFetchData<Company>("Company");
   const representatives: DataRetrieve<Representative> =
@@ -79,26 +78,15 @@ const ProcessForm = () => {
     })
   );
 
-  const handleNewCompanyCreation = async (company: {
-    name: string;
-    cui: number;
-  }) => {
-    console.log("New Company Created:", company);
-
-    const companyDTO: CompanyCreateRequestDTO = {
-      name: company.name,
-      cui: company.cui,
-    };
-
+  const handleNewCompanyCreation = async (data: Company | SRL | PFA) => {
     try {
       const response = await axios.post(
         "http://localhost:5179/api/Company",
-        companyDTO
+        formData
       );
-      console.log(response);
+      setCompanyId(response.data.id);
+      console.log(companyId);
       toast("Company submitted successfully:", response.data);
-      const newCompany: Company = response.data;
-      setCompanyId(newCompany.id);
     } catch (error: any) {
       if (error.response) {
         toast("Error data");
@@ -144,26 +132,52 @@ const ProcessForm = () => {
     additionalInfo: `position: ${employee.position}`,
   }));
 
-  const handleSelectCompany = (selectedValue: number) => {
-    setCompanyId(companyId);
+  const handleSelectCompany = (selectedOption: Option<number> | null) => {
+    if (selectedOption) {
+      setCompanyId(selectedOption.value);
+    } else {
+      setCompanyId(0);
+    }
   };
 
-  const handleSelectRepresentative = (RepresentativeId: number) => {
-    setRepresentativeId(RepresentativeId);
+  const handleSelectRepresentative = (
+    selectedOption: Option<number> | null
+  ) => {
+    if (selectedOption) {
+      setRepresentativeId(selectedOption.value);
+    } else {
+      setRepresentativeId(0);
+    }
   };
 
-  function handleSelectWorkplaces(selectedValue: Workplace[]): void {
-    const ids = selectedValue.map((workplace) => workplace.id);
-    setWorkplacesIds(ids);
+  function handleSelectWorkplaces(
+    selectedOptions: Option<number>[] | null
+  ): void {
+    if (selectedOptions) {
+      setWorkplacesIds(selectedOptions.map((option) => option.value));
+    } else {
+      setWorkplacesIds([]);
+    }
   }
 
-  function handleSelectServices(selectedValue: Service[]): void {
-    const ids = selectedValue.map((service) => service.id);
-    setServicesIds(ids);
+  function handleSelectServices(
+    selectedOptions: Option<number>[] | null
+  ): void {
+    if (selectedOptions) {
+      setServicesIds(selectedOptions.map((option) => option.value));
+    } else {
+      setServicesIds([]);
+    }
   }
 
-  function handleSelectEmployees(selectedValue: number[]): void {
-    setEmployeeIds(selectedValue);
+  function handleSelectEmployees(
+    selectedOptions: Option<number>[] | null
+  ): void {
+    if (selectedOptions) {
+      setEmployeeIds(selectedOptions.map((option) => option.value));
+    } else {
+      setEmployeeIds([]);
+    }
   }
 
   const handleSignatureSave = (
@@ -187,6 +201,7 @@ const ProcessForm = () => {
   };
 
   const handleSubmit = async () => {
+    if (isCustomCompanyVisible) handleNewCompanyCreation(formData);
     const processCreateRequestDTO: ProcessCreateRequestDTO = {
       signDate: new Date(),
       companyId: companyId,
@@ -198,15 +213,14 @@ const ProcessForm = () => {
       serviceIds: servicesIds,
     };
 
-    if (isCustomCompanyVisible)
-      handleNewCompanyCreation({ name: companyName, cui: companyCUI });
-
     try {
+      console.log(processCreateRequestDTO);
       const response = await axios.post(
         "http://localhost:5179/process",
         processCreateRequestDTO
       );
       toast("Process submitted successfully:", response.data);
+      console.log();
       resetStates();
     } catch (error: any) {
       if (error.response) {
@@ -225,11 +239,11 @@ const ProcessForm = () => {
   };
 
   const handleCompanyTypeChange = (selectedOption: {
-    value: string;
+    value: CompanyType;
     label: string;
   }) => {
-    setCompanyType(selectedOption.value as CompanyType);
-    setFormData({});
+    setCompanyType(selectedOption.value);
+    setFormData({} as any);
   };
 
   return (
@@ -268,16 +282,12 @@ const ProcessForm = () => {
             onChange={handleCompanyTypeChange as any}
             options={options}
           />
-          <GenericForm
+          <GenericForm<CompanyData[typeof companyType]>
             fields={fieldMetadata[companyType]}
-            initialData={formData}
-            onSubmit={(data) => console.log("Submitted Data:", data)}
-          ></GenericForm>
-          {/* <CustomCompanyForm
-            isVisible={isCustomCompanyVisible}
-            setName={setCompanyName}
-            setCui={setCompanyCUI}
-          ></CustomCompanyForm>{" "} */}
+            formData={formData}
+            setFormData={setFormData}
+            onSubmit={handleSubmit}
+          />
         </div>
       )}
       <div className="my-4">
@@ -291,7 +301,7 @@ const ProcessForm = () => {
         ) : (
           <Select
             options={representativeOptions}
-            onChange={handleSelectRepresentative as any}
+            onChange={handleSelectRepresentative}
             isMulti={false}
           />
         )}
