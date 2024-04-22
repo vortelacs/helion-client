@@ -6,16 +6,28 @@ import axios from "axios";
 
 const ProcessTable = () => {
   const [processes, setProcesses] = useState<ProcessInfoDTO[]>([]);
+  const [deleteCount, setDeleteCount] = useState(0);
+
+  const handleDeleteProcess = (id: number) => {
+    axios
+      .delete(`http://localhost:5179/process/${id}`)
+      .then(() => {
+        console.log("Process deleted successfully");
+        setDeleteCount((prev) => prev + 1);
+      })
+      .catch((error) => {
+        console.error("Failed to delete process:", error.response.data);
+      });
+  };
 
   useEffect(() => {
     axios
       .get<ProcessInfoDTO[]>("http://localhost:5179/processes")
-      // .get<ProcessInfoDTO[]>(`DOTNET_API_URL` + "/processes")
       .then((res) => setProcesses(res.data))
       .catch((err) => {
         throw err.message;
       });
-  }, []);
+  }, [deleteCount]);
   return (
     <div className="overflow-x-auto">
       <table className="table-auto border-collapse border border-gray-400">
@@ -34,6 +46,9 @@ const ProcessTable = () => {
             <th className="px-4 py-2 bg-gray-200 border border-gray-400">
               GPS Location
             </th>
+            <th className="px-4 py-2 bg-gray-200 border border-gray-400">
+              Delete process
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -51,6 +66,14 @@ const ProcessTable = () => {
               </td>
               <td className="px-4 py-2 border border-gray-400">
                 {process.gpsLocation}
+              </td>
+              <td className="px-4 py-2 border flex  border-gray-400">
+                <button
+                  className="bg-red-300 border-solid border-1 self-center rounded py-3 px-4"
+                  onClick={() => handleDeleteProcess(process.id)}
+                >
+                  Delete
+                </button>
               </td>
             </tr>
           ))}
