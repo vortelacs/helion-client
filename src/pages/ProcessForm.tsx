@@ -249,119 +249,124 @@ const ProcessForm = () => {
   };
 
   return (
-    <div className="border p-4 m-4 flex flex-col">
-      <div className="my-4">
-        <p>Choose the company</p>
-        {companies.loading ? (
-          <div>Loading Companies...</div>
-        ) : companies.error ? (
-          <div>Error loading companies: {companies.error.message}</div>
-        ) : (
-          <Select
-            isDisabled={isCustomCompanyVisible}
-            options={companyOptions}
-            onChange={handleSelectCompany as any}
-            isMulti={false}
-            required={true}
-          />
-        )}
-      </div>
-      <label className="flex my-2">
-        <input
-          type="checkbox"
-          checked={isCustomCompanyVisible}
-          onChange={handleCustomCompanyIsVisibleChange}
-        ></input>
-        <p className="px-2">My company is not in the list</p>
-      </label>
-      {isCustomCompanyVisible && (
-        <div>
-          <Select
-            className="m-2"
-            defaultValue={options.find(
-              (option) => option.value === companyType
-            )}
-            onChange={handleCompanyTypeChange as any}
-            options={options}
-          />
-          <GenericForm<CompanyData[typeof companyType]>
-            key={companyType}
-            fields={fieldMetadata[companyType]}
-            formData={companyFormData}
-            setFormData={setCompanyFormData}
-            onSubmit={handleSubmit}
-          />
+    <div className="min-h-screen bg-gray-100 justify-center border p-4 m-4 flex flex-col relative overflow-x-auto">
+      <div className="container max-w-screen-lg mx-auto">
+        <div className="my-4">
+          <p>Choose the company</p>
+          {companies.loading ? (
+            <div>Loading Companies...</div>
+          ) : companies.error ? (
+            <div>Error loading companies: {companies.error.message}</div>
+          ) : (
+            <Select
+              isDisabled={isCustomCompanyVisible}
+              options={companyOptions}
+              onChange={handleSelectCompany as any}
+              isMulti={false}
+              required={true}
+              className="w-full"
+            />
+          )}
         </div>
-      )}
-      <div className="my-4">
-        <p>Choose the representative</p>
-        {companies.loading ? (
-          <div>Loading the representatives...</div>
-        ) : representatives.error ? (
+        <label className="flex my-2 items-center">
+          <input
+            type="checkbox"
+            checked={isCustomCompanyVisible}
+            onChange={handleCustomCompanyIsVisibleChange}
+          ></input>
+          <p className="px-2">My company is not in the list</p>
+        </label>
+        {isCustomCompanyVisible && (
           <div>
-            Error loading representatives: {representatives.error.message}
+            <Select
+              className="m-2 w-full"
+              defaultValue={options.find(
+                (option) => option.value === companyType
+              )}
+              onChange={handleCompanyTypeChange as any}
+              options={options}
+            />
+            <GenericForm<CompanyData[typeof companyType]>
+              key={companyType}
+              fields={fieldMetadata[companyType]}
+              formData={companyFormData}
+              setFormData={setCompanyFormData}
+              onSubmit={handleSubmit}
+            />
           </div>
-        ) : (
-          <Select
-            options={representativeOptions}
-            onChange={handleSelectRepresentative}
-            isMulti={false}
-          />
         )}
-      </div>
-      <div className="my-4">
-        <p>Choose the employees</p>
-        {companies.loading ? (
-          <div>Loading employees...</div>
-        ) : employees.error ? (
-          <div>Error loading employees: {employees.error.message}</div>
-        ) : (
-          <Select
-            options={employeeOptions}
-            onChange={handleSelectEmployees as any}
-            isMulti={true}
-          />
-        )}
-      </div>
-      <div className="my-4">
-        <p>Choose the workplaces</p>
-        {workplaces.loading ? (
-          <div>Loading workplaces...</div>
-        ) : workplaces.error ? (
-          <div>Error loading workplaces: {workplaces.error.message}</div>
-        ) : (
-          <Select
-            required={true}
-            options={workplaceOptions}
-            onChange={handleSelectWorkplaces as any}
-            isMulti={true}
-            formatOptionLabel={formatOptionLabel}
-          />
-        )}
-      </div>
-      <div className="my-4">
-        <p>Choose the services</p>
-        {services.loading ? (
-          <div>Loading services...</div>
-        ) : services.error ? (
-          <div>Error loading services: {services.error.message}</div>
-        ) : (
-          <Select
-            options={serviceOptions}
-            isMulti={true}
-            onChange={handleSelectServices as any}
-          />
-        )}
-      </div>
-      <SignaturePad onSave={handleSignatureSave} />
-      <hr className="border-1 border-slate-950 my-7"></hr>
-      <div className=" p-2 self-end">
-        <button
-          className="bg-green-300 border-1 rounded py-3 px-4"
-          onClick={handleSubmit}
-        >
-          Submit
-        </button>
+        <div className="my-4">
+          <p>Choose the representative</p>
+          {companies.loading ? (
+            <div>Loading the representatives...</div>
+          ) : representatives.error ? (
+            <div>
+              Error loading representatives: {representatives.error.message}
+            </div>
+          ) : (
+            <Select
+              options={representativeOptions}
+              onChange={handleSelectRepresentative}
+              isMulti={false}
+              className="w-full"
+            />
+          )}
+        </div>
+        <div className="my-4">
+          <p>Choose the employees</p>
+          {companies.loading ? (
+            <div>Loading employees...</div>
+          ) : employees.error ? (
+            <div>Error loading employees: {employees.error.message}</div>
+          ) : (
+            <Select
+              options={employeeOptions}
+              onChange={handleSelectEmployees as any}
+              isMulti={true}
+              className="w-full"
+            />
+          )}
+        </div>
+        <div className="my-4">
+          <p>Choose the workplaces</p>
+          {workplaces.loading ? (
+            <div>Loading workplaces...</div>
+          ) : workplaces.error ? (
+            <div>Error loading workplaces: {workplaces.error.message}</div>
+          ) : (
+            <Select
+              required={true}
+              options={workplaceOptions}
+              onChange={handleSelectWorkplaces as any}
+              isMulti={true}
+              formatOptionLabel={formatOptionLabel}
+            />
+          )}
+        </div>
+        <div className="my-4">
+          <p>Choose the services</p>
+          {services.loading ? (
+            <div>Loading services...</div>
+          ) : services.error ? (
+            <div>Error loading services: {services.error.message}</div>
+          ) : (
+            <Select
+              options={serviceOptions}
+              isMulti={true}
+              onChange={handleSelectServices as any}
+            />
+          )}
+        </div>
+        <SignaturePad onSave={handleSignatureSave} />
+        <hr className="border-1 border-slate-950 my-7"></hr>
+        <div className="p-2 self-end">
+          <button
+            className="bg-green-300 hover:bg-green-400 text-white py-3 px-4 rounded focus:outline-none"
+            onClick={handleSubmit}
+          >
+            Submit
+          </button>
+        </div>
       </div>
     </div>
   );

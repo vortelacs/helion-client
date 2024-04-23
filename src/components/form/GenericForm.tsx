@@ -32,13 +32,13 @@ const GenericForm = <T extends { [key: string]: any }>({
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4"
+      className="bg-white shadow-md rounded px-4 sm:px-8 pt-6 pb-8 mb-4"
     >
       {fields.map((field) => (
         <div key={field.name} className="mb-4">
           <label
             htmlFor={field.name}
-            className="block text-gray-700 text-sm font-bold mb-2"
+            className="block text-gray-700 text-sm sm:text-base font-bold mb-2"
           >
             {field.label}
           </label>
@@ -46,7 +46,7 @@ const GenericForm = <T extends { [key: string]: any }>({
             id={field.name}
             type={field.type}
             name={field.name}
-            value={formData[field.name] as unknown as string} // Ensure casting for different input types
+            value={formData[field.name] as unknown as string}
             onChange={handleChange}
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
           />

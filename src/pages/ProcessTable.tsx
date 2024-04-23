@@ -2,8 +2,6 @@ import React, { useEffect, useState } from "react";
 import { ProcessInfoDTO } from "../model/dto/ProcessInfoDTO";
 import axios from "axios";
 
-// const DOTNET_API_URL = process.env.REACT_APP_DOTNET_API_URL;
-
 const ProcessTable = () => {
   const [processes, setProcesses] = useState<ProcessInfoDTO[]>([]);
   const [deleteCount, setDeleteCount] = useState(0);
@@ -28,48 +26,35 @@ const ProcessTable = () => {
         throw err.message;
       });
   }, [deleteCount]);
+
   return (
-    <div className="overflow-x-auto">
-      <table className="table-auto border-collapse border border-gray-400">
-        <thead>
+    <div className="relative overflow-x-auto">
+      <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+        <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
           <tr>
-            <th className="px-4 py-2 bg-gray-200 border border-gray-400">ID</th>
-            <th className="px-4 py-2 bg-gray-200 border border-gray-400">
-              Date
-            </th>
-            <th className="px-4 py-2 bg-gray-200 border border-gray-400">
-              Company
-            </th>
-            <th className="px-4 py-2 bg-gray-200 border border-gray-400">
-              ESignature
-            </th>
-            <th className="px-4 py-2 bg-gray-200 border border-gray-400">
-              GPS Location
-            </th>
-            <th className="px-4 py-2 bg-gray-200 border border-gray-400">
-              Delete process
-            </th>
+            <th className="px-4 py-3">ID</th>
+            <th className="px-4 py-3">Date</th>
+            <th className="px-4 py-3">Company</th>
+            <th className="px-4 py-3">Services</th>
+            <th className="px-4 py-3">GPS Location</th>
+            <th className="px-4 py-3">Delete process</th>
           </tr>
         </thead>
         <tbody>
           {processes.map((process) => (
             <tr key={process.id}>
-              <td className="px-4 py-2 border border-gray-400">{process.id}</td>
-              <td className="px-4 py-2 border border-gray-400">
+              <td className="px-4 py-3 border">{process.id}</td>
+              <td className="px-4 py-3 border">
                 {process.signDate.toString()}
               </td>
-              <td className="px-4 py-2 border border-gray-400">
-                {process.companyName}
+              <td className="px-4 py-3 border">{process.companyName}</td>
+              <td className="px-4 py-3 border">
+                {process.serviceNames.join(", ")}
               </td>
-              <td className="px-4 py-2 border border-gray-400">
-                {process.eSignature}
-              </td>
-              <td className="px-4 py-2 border border-gray-400">
-                {process.gpsLocation}
-              </td>
-              <td className="px-4 py-2 border flex  border-gray-400">
+              <td className="px-4 py-3 border">{process.gpsLocation}</td>
+              <td className="px-4 py-3 border">
                 <button
-                  className="bg-red-300 border-solid border-1 self-center rounded py-3 px-4"
+                  className="bg-red-300 hover:bg-red-400 text-white py-1 px-2 rounded focus:outline-none focus:shadow-outline"
                   onClick={() => handleDeleteProcess(process.id)}
                 >
                   Delete
