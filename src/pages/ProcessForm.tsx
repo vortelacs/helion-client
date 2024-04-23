@@ -57,7 +57,9 @@ const ProcessForm = () => {
   const [workplacesIds, setWorkplacesIds] = useState<number[]>([]);
   const [servicesIds, setServicesIds] = useState<number[]>([]);
   const [employeeIds, setEmployeeIds] = useState<number[]>([]);
-  const [formData, setFormData] = useState<Company | SRL | PFA>({} as Company);
+  const [companyFormData, setCompanyFormData] = useState<Company | SRL | PFA>(
+    {} as any
+  );
   const [signDate, setSignDate] = useState<Date>(new Date());
   const [eSignature, setESignature] = useState<string>("");
   const [gpsLocation, setGPSLocation] = useState<string>("");
@@ -82,7 +84,7 @@ const ProcessForm = () => {
     try {
       const response = await axios.post(
         "http://localhost:5179/api/Company",
-        formData
+        companyFormData
       );
       setCompanyId(response.data.id);
       console.log(companyId);
@@ -201,7 +203,7 @@ const ProcessForm = () => {
   };
 
   const handleSubmit = async () => {
-    if (isCustomCompanyVisible) handleNewCompanyCreation(formData);
+    if (isCustomCompanyVisible) handleNewCompanyCreation(companyFormData);
     const processCreateRequestDTO: ProcessCreateRequestDTO = {
       signDate: new Date(),
       companyId: companyId,
@@ -243,7 +245,7 @@ const ProcessForm = () => {
     label: string;
   }) => {
     setCompanyType(selectedOption.value);
-    setFormData({} as any);
+    setCompanyFormData({} as any);
   };
 
   return (
@@ -283,9 +285,10 @@ const ProcessForm = () => {
             options={options}
           />
           <GenericForm<CompanyData[typeof companyType]>
+            key={companyType}
             fields={fieldMetadata[companyType]}
-            formData={formData}
-            setFormData={setFormData}
+            formData={companyFormData}
+            setFormData={setCompanyFormData}
             onSubmit={handleSubmit}
           />
         </div>
