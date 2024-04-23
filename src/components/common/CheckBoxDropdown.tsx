@@ -1,8 +1,6 @@
 import React from "react";
 import Select, { OptionProps, components } from "react-select";
 import makeAnimated from "react-select/animated";
-import OptionTypeBase from "react-select";
-import { Option } from "./Dropdown";
 
 // Define the option type
 export interface MultiOption {
