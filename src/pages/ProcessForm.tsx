@@ -80,28 +80,25 @@ const ProcessForm = () => {
     })
   );
 
-  const handleNewCompanyCreation = async (data: Company | SRL | PFA) => {
+  const handleNewCompanyCreation = async (
+    companyFormData: Company | SRL | PFA
+  ): Promise<number> => {
     try {
-      const response = await axios.post(
+      const response = await axios.post<number>(
         "http://localhost:5179/api/Company",
         companyFormData
       );
-      setCompanyId(response.data.id);
-      console.log(companyId);
-      toast("Company submitted successfully:", response.data);
+      const companyId = response.data;
+      setCompanyId(companyId);
+      toast("Company submitted successfully: " + companyId);
+      return companyId;
     } catch (error: any) {
-      if (error.response) {
-        toast("Error data");
-        console.error("Error data:", error.response.data);
-        console.error("Error status:", error.response.status);
-        console.error("Error headers:", error.response.headers);
-      } else if (error.request) {
-        toast("No response received");
-        console.error("No response received:", error.request);
-      } else {
-        toast("Error! Try later");
-        console.error("Error", error.message);
-      }
+      console.error(
+        "Failed to create company:",
+        error.response ? error.response.data : error.message
+      );
+      toast("Failed to create company");
+      throw error;
     }
   };
 
@@ -195,7 +192,7 @@ const ProcessForm = () => {
     setCompanyId(0);
     setRepresentativeId(0);
     setESignature("");
-    setSignDate(new Date()); // Reset to current date or specific initial date if needed
+    setSignDate(new Date());
     setGPSLocation("");
     setWorkplacesIds([]);
     setEmployeeIds([]);
@@ -203,10 +200,14 @@ const ProcessForm = () => {
   };
 
   const handleSubmit = async () => {
-    if (isCustomCompanyVisible) handleNewCompanyCreation(companyFormData);
+    let newCompanyId: number = companyId;
+
+    if (isCustomCompanyVisible) {
+      newCompanyId = await handleNewCompanyCreation(companyFormData);
+    }
     const processCreateRequestDTO: ProcessCreateRequestDTO = {
       signDate: new Date(),
-      companyId: companyId,
+      companyId: newCompanyId,
       representativeId: representativeId,
       eSignature: eSignature,
       gpsLocation: gpsLocation,
@@ -354,6 +355,7 @@ const ProcessForm = () => {
               options={serviceOptions}
               isMulti={true}
               onChange={handleSelectServices as any}
+              required={true}
             />
           )}
         </div>
